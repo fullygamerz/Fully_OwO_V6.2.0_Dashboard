@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fully OwO — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:   #06090e;
+  --bg2:  #0a0f18;
+  --bg3:  #0d1420;
+  --card: #0d1420;
+  --border: #182538;
+  --green:  #00ff88;
+  --cyan:   #00d4ff;
+  --red:    #ff3d5a;
+  --yellow: #ffd700;
+  --purple: #c084fc;
+  --orange: #fb923c;
+  --text:   #c8d6e8;
+  --dim:    #354d66;
+  --gG: 0 0 20px rgba(0,255,136,.3), 0 0 60px rgba(0,255,136,.07);
+  --gR: 0 0 20px rgba(255,61,90,.35),0 0 60px rgba(255,61,90,.08);
+  --gC: 0 0 20px rgba(0,212,255,.3), 0 0 60px rgba(0,212,255,.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::after{content:'';pointer-events:none;position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);z-index:9999;}
+
+/* ── HEADER ── */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:58px;
+  border-bottom:1px solid var(--border);
+  background:rgba(8,12,20,.98);
+  backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:500;
+}
+.logo{display:flex;align-items:center;gap:11px;}
+.logo-badge{
+  width:34px;height:34px;border-radius:9px;
+  background:var(--green);display:flex;align-items:center;justify-content:center;
+  font-size:17px;box-shadow:var(--gG);
+  animation:pglow 3s ease-in-out infinite;
+}
+@keyframes pglow{0%,100%{box-shadow:var(--gG);}50%{box-shadow:0 0 30px rgba(0,255,136,.65),0 0 90px rgba(0,255,136,.12);}}
+.logo-name{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.3px;}
+.logo-name span{color:var(--green);}
+.logo-sub{font-size:8px;color:var(--dim);letter-spacing:2.5px;text-transform:uppercase;margin-top:1px;}
+
+/* ── TABS ── */
+.tabs{display:flex;align-items:center;gap:2px;background:rgba(13,20,32,.8);border:1px solid var(--border);border-radius:9px;padding:3px;}
+.tab{
+  cursor:pointer;padding:7px 18px;border-radius:7px;
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--dim);transition:all .2s;display:flex;align-items:center;gap:6px;
+  border:none;background:transparent;font-family:'JetBrains Mono',monospace;
+}
+.tab:hover{color:var(--text);}
+.tab.active{background:var(--bg3);color:var(--green);border:1px solid rgba(0,255,136,.15);}
+
+.header-right{display:flex;align-items:center;gap:10px;}
+.status-pill{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 14px;border-radius:100px;border:1.5px solid var(--border);
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  transition:all .25s;
+}
+.status-pill.online{border-color:rgba(0,255,136,.45);color:var(--green);box-shadow:var(--gG);}
+.status-pill.offline{border-color:rgba(255,61,90,.35);color:var(--red);}
+.status-pill.sleeping{border-color:rgba(255,215,0,.35);color:var(--yellow);}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--red);transition:all .3s;flex-shrink:0;}
+.status-pill.online .sdot{background:var(--green);box-shadow:0 0 7px var(--green);animation:blink 2s ease-in-out infinite;}
+.status-pill.sleeping .sdot{background:var(--yellow);box-shadow:0 0 7px var(--yellow);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+/* ── PAGES ── */
+.page{display:none;animation:fadeIn .2s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── HOME — NO TOKEN ── */
+.no-token{
+  max-width:480px;margin:80px auto;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:20px;
+}
+.no-token-icon{font-size:56px;filter:grayscale(1);opacity:.4;}
+.no-token-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--text);}
+.no-token-sub{font-size:12px;color:var(--dim);line-height:1.7;}
+.go-settings-btn{
+  cursor:pointer;padding:12px 28px;border-radius:9px;
+  border:1.5px solid rgba(0,255,136,.4);color:var(--green);
+  background:rgba(0,255,136,.05);font-family:'JetBrains Mono',monospace;
+  font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  transition:all .2s;
+}
+.go-settings-btn:hover{background:rgba(0,255,136,.1);box-shadow:var(--gG);}
+
+/* ── HOME — MAIN GRID ── */
+.grid{max-width:1380px;margin:0 auto;padding:20px 24px;display:grid;grid-template-columns:repeat(12,1fr);gap:15px;}
+
+/* TICKER */
+.ticker-wrap{grid-column:1/-1;overflow:hidden;border:1px solid var(--border);border-radius:8px;background:var(--bg3);padding:7px 0;}
+.ticker{display:flex;gap:0;animation:scrollTick 20s linear infinite;width:max-content;}
+.ticker:hover{animation-play-state:paused;}
+@keyframes scrollTick{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.tick-item{display:flex;align-items:center;gap:6px;padding:0 20px;font-size:10px;white-space:nowrap;border-right:1px solid var(--border);}
+.tdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .3s;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,.08),transparent);}
+.card:hover{border-color:rgba(0,212,255,.12);}
+.card-title{font-size:8.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* BOT CONTROL CARD */
+.control-card{grid-column:1/5;}
+.bot-account{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:9px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:13px;}
+.bot-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1a3050,#0d1f38);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.bot-name{font-size:13px;font-weight:700;color:var(--text);}
+.bot-tag{font-size:10px;color:var(--dim);margin-top:2px;}
+.ctrl-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cbtn{
+  cursor:pointer;padding:11px;border-radius:8px;border:1.5px solid;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.cbtn-start{border-color:rgba(0,255,136,.45);color:var(--green);background:rgba(0,255,136,.04);}
+.cbtn-start:hover{background:rgba(0,255,136,.1);box-shadow:var(--gG);}
+.cbtn-stop{border-color:rgba(255,61,90,.45);color:var(--red);background:rgba(255,61,90,.04);}
+.cbtn-stop:hover{background:rgba(255,61,90,.1);box-shadow:var(--gR);}
+.cbtn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* STAT CARDS */
+.stats-row{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,1fr);gap:11px;}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:14px 13px;position:relative;overflow:hidden;transition:all .3s;}
+.stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ac,var(--green));opacity:.35;transition:opacity .3s,height .3s;}
+.stat:hover::after{opacity:1;height:3px;}
+.sico{font-size:17px;margin-bottom:7px;display:block;}
+.slbl{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:3px;}
+.sval{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--ac,var(--green));line-height:1;}
+.ssub{font-size:8.5px;color:var(--dim);margin-top:2px;}
+
+/* LOG */
+.log-card{grid-column:1/8;}
+.log-wrap{height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding-right:3px;}
+.log-wrap::-webkit-scrollbar{width:3px;}
+.log-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.lentry{display:flex;align-items:flex-start;gap:8px;font-size:10.5px;padding:6px 9px;border-radius:6px;background:rgba(255,255,255,.015);border-left:2px solid transparent;line-height:1.5;animation:slideIn .2s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-5px);}to{opacity:1;transform:translateX(0);}}
+.lentry.cmd    {border-left-color:var(--green);}
+.lentry.sleep  {border-left-color:var(--dim);}
+.lentry.warn   {border-left-color:var(--red);background:rgba(255,61,90,.04);}
+.lentry.hb     {border-left-color:var(--orange);}
+.lentry.gem    {border-left-color:var(--yellow);}
+.lentry.hunt   {border-left-color:var(--green);}
+.lentry.captcha{border-left-color:var(--red);background:rgba(255,61,90,.05);}
+.lentry.info   {border-left-color:var(--dim);}
+.ltime{color:var(--dim);font-size:9px;white-space:nowrap;margin-top:1px;flex-shrink:0;width:48px;}
+.lico{font-size:12px;flex-shrink:0;}
+.lmsg{color:var(--text);}
+
+/* RIGHT PANEL */
+.rpanel{grid-column:8/13;display:flex;flex-direction:column;gap:14px;}
+
+/* HUNTBOT */
+.hb-status-row{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-radius:8px;background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.18);margin-bottom:10px;}
+.hb-lbl{font-size:12px;font-weight:700;color:var(--orange);}
+.hb-sub{font-size:9.5px;color:var(--dim);margin-top:2px;}
+.hb-badge{font-size:8.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:100px;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25);color:var(--orange);}
+.hb-badge.hunting{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.25);color:var(--green);animation:blink 1.5s ease-in-out infinite;}
+.cowoncy-row{display:flex;align-items:center;justify-content:space-between;padding:4px 2px;}
+.cowoncy-amt{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--yellow);}
+.solver-row{display:flex;align-items:center;gap:6px;padding:8px 11px;border-radius:7px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
+.sdot-sm{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* SPEED */
+.speed-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.spbtn{cursor:pointer;padding:10px 8px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:10px;transition:all .2s;text-align:center;line-height:1.3;}
+.spbtn:hover{border-color:rgba(0,212,255,.25);color:var(--cyan);}
+.spbtn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.06);box-shadow:var(--gC);}
+.spbtn .sn{font-weight:700;font-size:10.5px;}
+.spbtn .sd{font-size:8px;opacity:.55;margin-top:2px;}
+
+/* BARS */
+.bars-card{grid-column:1/8;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.bar-row:last-child{margin-bottom:0;}
+.bar-cmd{font-size:10px;width:70px;flex-shrink:0;color:var(--dim);}
+.bar-track{flex:1;height:5px;background:rgba(255,255,255,.04);border-radius:100px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:100px;transition:width 1.2s ease;}
+.bar-count{font-size:10px;color:var(--dim);width:38px;text-align:right;flex-shrink:0;}
+
+/* ── SETTINGS PAGE ── */
+.settings-wrap{max-width:680px;margin:0 auto;padding:24px;}
+.settings-section{margin-bottom:28px;}
+.section-title{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Token box */
+.token-box{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:20px;}
+.token-status{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:11px 14px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
+.token-status-icon{font-size:22px;}
+.token-status-text .ts-label{font-size:12px;font-weight:700;}
+.token-status-text .ts-sub{font-size:10px;color:var(--dim);margin-top:2px;}
+.token-status.set{border-color:rgba(0,255,136,.2);background:rgba(0,255,136,.03);}
+.token-status.set .ts-label{color:var(--green);}
+.token-status.notset{border-color:rgba(255,61,90,.2);background:rgba(255,61,90,.03);}
+.token-status.notset .ts-label{color:var(--red);}
+
+.token-input-wrap{position:relative;margin-bottom:12px;}
+.token-input{
+  width:100%;padding:12px 44px 12px 14px;border-radius:8px;
+  border:1.5px solid var(--border);background:rgba(255,255,255,.02);
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;
+  outline:none;transition:border-color .2s;letter-spacing:.5px;
+}
+.token-input::placeholder{color:var(--dim);}
+.token-input:focus{border-color:rgba(0,212,255,.4);}
+.token-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:var(--dim);transition:color .2s;border:none;background:none;}
+.token-eye:hover{color:var(--text);}
+
+.token-btns{display:flex;gap:8px;}
+.tbtn{
+  cursor:pointer;padding:10px 20px;border-radius:8px;border:1.5px solid;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;transition:all .2s;
+  display:flex;align-items:center;gap:6px;
+}
+.tbtn-save{border-color:rgba(0,255,136,.45);color:var(--green);background:rgba(0,255,136,.04);}
+.tbtn-save:hover{background:rgba(0,255,136,.1);box-shadow:var(--gG);}
+.tbtn-remove{border-color:rgba(255,61,90,.4);color:var(--red);background:rgba(255,61,90,.03);}
+.tbtn-remove:hover{background:rgba(255,61,90,.09);}
+
+.token-warn{font-size:10px;color:var(--dim);margin-top:10px;line-height:1.7;padding:10px 12px;border-radius:7px;background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.1);}
+.token-warn b{color:var(--yellow);}
+
+/* Info rows */
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:7px;}
+.info-row:last-child{margin-bottom:0;}
+.ir-label{font-size:11px;color:var(--dim);}
+.ir-val{font-size:11px;font-weight:700;color:var(--text);}
+.ir-val.green{color:var(--green);}
+.ir-val.red{color:var(--red);}
+.ir-val.yellow{color:var(--yellow);}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:22px;right:22px;
+  padding:11px 20px;border-radius:9px;font-size:11px;font-weight:700;
+  border:1.5px solid;backdrop-filter:blur(14px);
+  transform:translateY(80px);opacity:0;transition:all .3s;z-index:2000;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok {border-color:rgba(0,255,136,.45);color:var(--green);background:rgba(6,9,14,.9);}
+.toast.err{border-color:rgba(255,61,90,.45); color:var(--red);  background:rgba(6,9,14,.9);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-badge">🐾</div>
+    <div>
+      <div class="logo-name">Fully <span>OwO</span></div>
+      <div class="logo-sub">Dashboard · Fully Development</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-home"     onclick="showTab('home')">🏠 Home</button>
+    <button class="tab"        id="tab-settings" onclick="showTab('settings')">⚙️ Settings</button>
+  </div>
+
+  <div class="header-right">
+    <div class="status-pill offline" id="status-pill">
+      <div class="sdot"></div>
+      <span id="status-lbl">OFFLINE</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- NO TOKEN STATE -->
+  <div class="no-token" id="no-token-view">
+    <div class="no-token-icon">🔒</div>
+    <div class="no-token-title">No Account Attached</div>
+    <div class="no-token-sub">
+      You haven't added a Discord token yet.<br>
+      Go to <b>Settings</b> to add your token, then come back here to start the bot.
+    </div>
+    <button class="go-settings-btn" onclick="showTab('settings')">⚙️ Go to Settings →</button>
+  </div>
+
+  <!-- MAIN DASHBOARD (shown when token exists) -->
+  <div id="main-view" style="display:none;">
+    <div class="grid">
+
+      <!-- TICKER -->
+      <div class="ticker-wrap">
+        <div class="ticker" id="ticker">
+          <div class="tick-item"><div class="tdot" style="background:var(--dim)"></div><span style="color:var(--dim)">Loading...</span></div>
+        </div>
+      </div>
+
+      <!-- BOT CONTROL -->
+      <div class="card control-card">
+        <div class="card-title">🤖 Bot Account</div>
+        <div class="bot-account">
+          <div class="bot-avatar">🐾</div>
+          <div>
+            <div class="bot-name" id="bot-name">Connected</div>
+            <div class="bot-tag" id="bot-tag">Token saved · Ready to start</div>
+          </div>
+        </div>
+        <div class="ctrl-btns">
+          <button class="cbtn cbtn-start" id="btn-start" onclick="botStart()">▶ START</button>
+          <button class="cbtn cbtn-stop"  id="btn-stop"  onclick="botStop()">■ STOP</button>
+        </div>
+      </div>
+
+      <!-- UPTIME CARD -->
+      <div class="card" style="grid-column:5/8;">
+        <div class="card-title">⏱️ Session Info</div>
+        <div style="display:flex;flex-direction:column;gap:9px;">
+          <div class="info-row"><span class="ir-label">Uptime</span><span class="ir-val green" id="uptime-val">—</span></div>
+          <div class="info-row"><span class="ir-label">Speed Mode</span><span class="ir-val yellow" id="ir-speed">—</span></div>
+          <div class="info-row"><span class="ir-label">Sleep Mode</span><span class="ir-val" id="ir-sleep">NO</span></div>
+          <div class="info-row"><span class="ir-label">Lifetime Cycles</span><span class="ir-val" id="ir-cycles">0</span></div>
+        </div>
+      </div>
+
+      <!-- HB QUICK -->
+      <div class="card" style="grid-column:8/13;">
+        <div class="card-title">🎯 HuntBot</div>
+        <div class="hb-status-row">
+          <div>
+            <div class="hb-lbl">Auto Hunt</div>
+            <div class="hb-sub" id="hb-timer">Not started</div>
+          </div>
+          <div class="hb-badge" id="hb-badge">IDLE</div>
+        </div>
+        <div class="cowoncy-row">
+          <span style="font-size:10px;color:var(--dim)">Optimal Cowoncy</span>
+          <span class="cowoncy-amt" id="hb-cowoncy">—</span>
+        </div>
+        <div style="height:1px;background:var(--border);margin:10px 0;"></div>
+        <div class="solver-row">
+          <div class="sdot-sm" id="solver-dot" style="background:var(--green);box-shadow:0 0 6px var(--green);"></div>
+          <span style="font-size:10px;">CAPTCHA Solver</span>
+          <span style="font-size:10px;color:var(--green);margin-left:auto;" id="solver-status">Ready</span>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat" style="--ac:var(--green)">
+          <span class="sico">📤</span>
+          <div class="slbl">Commands Sent</div>
+          <div class="sval" id="s-cmds">0</div>
+          <div class="ssub">total</div>
+        </div>
+        <div class="stat" style="--ac:var(--yellow)">
+          <span class="sico">💎</span>
+          <div class="slbl">Gems Used</div>
+          <div class="sval" id="s-gems">0</div>
+          <div class="ssub">auto-equipped</div>
+        </div>
+        <div class="stat" style="--ac:var(--cyan)">
+          <span class="sico">⚡</span>
+          <div class="slbl">Speed Mode</div>
+          <div class="sval" style="font-size:14px;" id="s-speed">—</div>
+          <div class="ssub" id="s-speed-sub">—</div>
+        </div>
+        <div class="stat" style="--ac:var(--purple)">
+          <span class="sico">♾️</span>
+          <div class="slbl">Work Cycles</div>
+          <div class="sval" id="s-cycles">0</div>
+          <div class="ssub">lifetime</div>
+        </div>
+        <div class="stat" style="--ac:var(--orange)">
+          <span class="sico">🎯</span>
+          <div class="slbl">HuntBot</div>
+          <div class="sval" style="font-size:14px;" id="s-hb">IDLE</div>
+          <div class="ssub" id="s-hb-sub">waiting</div>
+        </div>
+        <div class="stat" style="--ac:var(--red)">
+          <span class="sico">🛏️</span>
+          <div class="slbl">Sleeping</div>
+          <div class="sval" style="font-size:14px;" id="s-sleep">NO</div>
+          <div class="ssub">auto rest</div>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div class="card log-card">
+        <div class="card-title">📋 Live Activity Log</div>
+        <div class="log-wrap" id="log-container">
+          <div class="lentry info">
+            <span class="ltime">--:--</span>
+            <span class="lico">💡</span>
+            <span class="lmsg">Waiting for bot activity...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPEED + DETAILS -->
+      <div class="rpanel">
+
+        <div class="card">
+          <div class="card-title">⚡ Speed Mode</div>
+          <div class="speed-grid">
+            <button class="spbtn" id="spd-efficient" onclick="spUI('efficient',this)">
+              <div class="sn">Efficient</div><div class="sd">Fast · 3–3.5h run</div>
+            </button>
+            <button class="spbtn" id="spd-fast" onclick="spUI('fast',this)">
+              <div class="sn">Fast ⚠️</div><div class="sd">Risky · not recommended</div>
+            </button>
+            <button class="spbtn active" id="spd-durable" onclick="spUI('durable',this)">
+              <div class="sn">Durable ✅</div><div class="sd">Safe · 5–7h run</div>
+            </button>
+            <button class="spbtn" id="spd-lifetime" onclick="spUI('lifetime',this)">
+              <div class="sn">Lifetime ♾️</div><div class="sd">Max bypass · 24h skip</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 Session Details</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div class="info-row"><span class="ir-label">Day Skip Active</span><span class="ir-val" id="d-dayskip">NO</span></div>
+            <div class="info-row"><span class="ir-label">HuntBot Solver</span><span class="ir-val green" id="d-solver">Ready</span></div>
+            <div class="info-row"><span class="ir-label">Last Updated</span><span class="ir-val" id="d-updated">—</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COMMAND BARS -->
+      <div class="card bars-card">
+        <div class="card-title">📊 Estimated Command Breakdown</div>
+        <div id="cmd-bars">
+          <div class="bar-row"><span class="bar-cmd">owo h</span><div class="bar-track"><div class="bar-fill" id="bf-h" style="width:0%;background:var(--green);"></div></div><span class="bar-count" id="bc-h">0</span></div>
+          <div class="bar-row"><span class="bar-cmd">owo b</span><div class="bar-track"><div class="bar-fill" id="bf-b" style="width:0%;background:var(--cyan);"></div></div><span class="bar-count" id="bc-b">0</span></div>
+          <div class="bar-row"><span class="bar-cmd">owo pray</span><div class="bar-track"><div class="bar-fill" id="bf-pray" style="width:0%;background:var(--purple);"></div></div><span class="bar-count" id="bc-pray">0</span></div>
+          <div class="bar-row"><span class="bar-cmd">owo cf</span><div class="bar-track"><div class="bar-fill" id="bf-cf" style="width:0%;background:var(--yellow);"></div></div><span class="bar-count" id="bc-cf">0</span></div>
+          <div class="bar-row"><span class="bar-cmd">owo hb</span><div class="bar-track"><div class="bar-fill" id="bf-hb" style="width:0%;background:var(--orange);"></div></div><span class="bar-count" id="bc-hb">0</span></div>
+          <div class="bar-row"><span class="bar-cmd">owo use</span><div class="bar-track"><div class="bar-fill" id="bf-use" style="width:0%;background:var(--yellow);"></div></div><span class="bar-count" id="bc-use">0</span></div>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </div><!-- /main-view -->
+</div><!-- /page-home -->
+
+
+<!-- ══════════════════════════════════════════════
+     SETTINGS PAGE
+══════════════════════════════════════════════ -->
+<div class="page" id="page-settings">
+  <div class="settings-wrap">
+
+    <!-- TOKEN SECTION -->
+    <div class="settings-section">
+      <div class="section-title">🔑 Discord Token</div>
+      <div class="token-box">
+
+        <div class="token-status notset" id="token-status-box">
+          <div class="token-status-icon" id="token-status-icon">❌</div>
+          <div class="token-status-text">
+            <div class="ts-label" id="token-status-label">No Token Set</div>
+            <div class="ts-sub"   id="token-status-sub">Add your Discord token below to get started</div>
+          </div>
+        </div>
+
+        <div class="token-input-wrap">
+          <input
+            type="password"
+            id="token-input"
+            class="token-input"
+            placeholder="Paste your Discord token here..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="token-eye" id="eye-btn" onclick="toggleEye()">👁️</button>
+        </div>
+
+        <div class="token-btns">
+          <button class="tbtn tbtn-save"   onclick="saveToken()">💾 Save Token</button>
+          <button class="tbtn tbtn-remove" onclick="removeToken()">🗑️ Remove</button>
+        </div>
+
+        <div class="token-warn">
+          <b>⚠️ Keep your token private!</b> Never share it with anyone.<br>
+          The token is stored locally in <code>config.json</code> only.
+        </div>
+      </div>
+    </div>
+
+    <!-- BOT INFO -->
+    <div class="settings-section">
+      <div class="section-title">ℹ️ Bot Info</div>
+      <div class="info-row"><span class="ir-label">Bot Version</span><span class="ir-val green">Fully OwO V6.0.5</span></div>
+      <div style="height:7px;"></div>
+      <div class="info-row"><span class="ir-label">Developer</span><span class="ir-val">Fully [fullyneverdies]</span></div>
+      <div style="height:7px;"></div>
+      <div class="info-row"><span class="ir-label">Server</span><span class="ir-val">Fully Development</span></div>
+      <div style="height:7px;"></div>
+      <div class="info-row"><span class="ir-label">Dashboard Version</span><span class="ir-val yellow">v2.0 — Live API</span></div>
+    </div>
+
+    <!-- HOW TO USE -->
+    <div class="settings-section">
+      <div class="section-title">📖 How To Use</div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:16px 18px;line-height:2;font-size:11px;color:var(--dim);">
+        <b style="color:var(--green);">Step 1</b> — Paste your Discord token above and hit <b style="color:var(--text);">Save Token</b><br>
+        <b style="color:var(--green);">Step 2</b> — Go to <b style="color:var(--text);">Home</b> tab<br>
+        <b style="color:var(--green);">Step 3</b> — Click <b style="color:var(--green);">▶ START</b> to launch the bot<br>
+        <b style="color:var(--green);">Step 4</b> — Go to your Discord channel and type <b style="color:var(--cyan)">.start</b><br>
+        <b style="color:var(--green);">Step 5</b> — Watch the dashboard go live! 🔥<br>
+        <br>
+        <b style="color:var(--yellow);">Speed mode</b> is changed by typing <b style="color:var(--cyan)">.speed durable</b> in Discord.<br>
+        <b style="color:var(--yellow);">Status</b> check: type <b style="color:var(--cyan)">.status</b> in Discord.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let hasToken = false;
+let lastLogSig = '';
+let pollTimer  = null;
+
+// ─── Tab Navigation ───────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab' ).forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('tab-'  + name).classList.add('active');
+  if (name === 'settings') loadTokenStatus();
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ─── Token UI ─────────────────────────────────────────────────────────────────
+let eyeOpen = false;
+function toggleEye() {
+  eyeOpen = !eyeOpen;
+  document.getElementById('token-input').type = eyeOpen ? 'text' : 'password';
+  document.getElementById('eye-btn').textContent = eyeOpen ? '🙈' : '👁️';
+}
+
+async function loadTokenStatus() {
+  try {
+    const r = await fetch('/api/token');
+    const d = await r.json();
+    hasToken = d.has_token;
+    const box   = document.getElementById('token-status-box');
+    const icon  = document.getElementById('token-status-icon');
+    const label = document.getElementById('token-status-label');
+    const sub   = document.getElementById('token-status-sub');
+    if (d.has_token) {
+      box.className   = 'token-status set';
+      icon.textContent = '✅';
+      label.textContent = 'Token Set';
+      sub.textContent   = `Saved: ${d.masked}`;
+      document.getElementById('token-input').placeholder = 'Token already saved — paste new to update';
+    } else {
+      box.className    = 'token-status notset';
+      icon.textContent  = '❌';
+      label.textContent = 'No Token Set';
+      sub.textContent   = 'Add your Discord token below to get started';
+    }
+  } catch {}
+}
+
+async function saveToken() {
+  const val = document.getElementById('token-input').value.trim();
+  if (!val) { toast('Paste a token first!', 'err'); return; }
+  try {
+    const r = await fetch('/api/token', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ token: val })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      toast('✅ ' + d.msg);
+      document.getElementById('token-input').value = '';
+      hasToken = true;
+      loadTokenStatus();
+      updateHomeView(true);
+    } else {
+      toast('❌ ' + d.msg, 'err');
+    }
+  } catch { toast('Cannot reach server', 'err'); }
+}
+
+async function removeToken() {
+  try {
+    await fetch('/api/token', { method: 'DELETE' });
+    toast('Token removed');
+    hasToken = false;
+    document.getElementById('token-input').value = '';
+    loadTokenStatus();
+    updateHomeView(false);
+  } catch { toast('Cannot reach server', 'err'); }
+}
+
+// ─── Home view toggle ─────────────────────────────────────────────────────────
+function updateHomeView(tokenExists) {
+  document.getElementById('no-token-view').style.display = tokenExists ? 'none' : 'flex';
+  document.getElementById('main-view'    ).style.display = tokenExists ? 'block': 'none';
+}
+
+// ─── Bot Controls ─────────────────────────────────────────────────────────────
+async function botStart() {
+  try {
+    const r = await fetch('/api/start', { method:'POST' });
+    const d = await r.json();
+    toast((d.ok ? '✅ ' : '❌ ') + d.msg, d.ok ? 'ok' : 'err');
+  } catch { toast('Cannot reach server', 'err'); }
+}
+async function botStop() {
+  try {
+    const r = await fetch('/api/stop', { method:'POST' });
+    const d = await r.json();
+    toast((d.ok ? '🛑 ' : '❌ ') + d.msg, d.ok ? 'ok' : 'err');
+  } catch { toast('Cannot reach server', 'err'); }
+}
+
+// ─── Poll status ──────────────────────────────────────────────────────────────
+async function pollStatus() {
+  try {
+    const r = await fetch('/api/status');
+    if (!r.ok) throw 0;
+    const d = await r.json();
+
+    // Check token
+    if (d.has_token !== hasToken) {
+      hasToken = d.has_token;
+      updateHomeView(hasToken);
+    }
+    updateHomeView(hasToken);
+
+    const online = d.process_alive && (d.running || d.has_started);
+
+    // Status pill
+    const pill = document.getElementById('status-pill');
+    const lbl  = document.getElementById('status-lbl');
+    if (d.sleep_mode) {
+      pill.className = 'status-pill sleeping';
+      lbl.textContent = 'SLEEPING';
+    } else if (online) {
+      pill.className = 'status-pill online';
+      lbl.textContent = 'ONLINE';
+    } else {
+      pill.className = 'status-pill offline';
+      lbl.textContent = 'OFFLINE';
+    }
+
+    // Stats
+    set('s-cmds',  (d.commands_sent||0).toLocaleString());
+    set('s-gems',   d.gems_used || 0);
+    set('uptime-val', d.uptime || '—');
+    const spMap = { efficient:'EFFICIENT', fast:'FAST', durable:'DURABLE', lifetime:'LIFETIME' };
+    const spSub = { efficient:'3–3.5h run', fast:'not recommended', durable:'5–7h run', lifetime:'ultra bypass' };
+    const sp = d.speed_mode || 'durable';
+    set('s-speed',    spMap[sp] || sp.toUpperCase());
+    set('s-speed-sub', spSub[sp] || '');
+    set('ir-speed',  spMap[sp] || sp.toUpperCase());
+    set('s-cycles',  d.lifetime_cycles || 0);
+    set('ir-cycles', d.lifetime_cycles || 0);
+    const sleeping = d.sleep_mode;
+    set('s-sleep',  sleeping ? 'YES' : 'NO');
+    set('ir-sleep', sleeping ? 'YES' : 'NO');
+    document.getElementById('s-sleep').style.color  = sleeping ? 'var(--yellow)' : 'var(--dim)';
+    document.getElementById('ir-sleep').className   = 'ir-val ' + (sleeping ? 'yellow' : '');
+
+    // HuntBot
+    const hb = d.hb_data || {};
+    const hunting = hb.is_hunting || d.hb_active;
+    set('s-hb',    hunting ? 'ACTIVE' : 'IDLE');
+    set('s-hb-sub', hunting ? 'hunting now' : 'waiting');
+    document.getElementById('s-hb').style.color = hunting ? 'var(--green)' : 'var(--dim)';
+    const badge = document.getElementById('hb-badge');
+    badge.textContent = hunting ? 'HUNTING' : 'IDLE';
+    badge.className   = 'hb-badge' + (hunting ? ' hunting' : '');
+    if (hb.optimal_cowoncy) set('hb-cowoncy', Number(hb.optimal_cowoncy).toLocaleString());
+    if (hb.next_huntbot_time && hunting) {
+      const diff = Math.max(0, Math.floor((new Date(hb.next_huntbot_time) - new Date()) / 1000));
+      const h = Math.floor(diff/3600), m = Math.floor((diff%3600)/60), s = diff%60;
+      set('hb-timer', diff > 0 ? `Returns in ${h}h ${m}m ${s}s` : 'Returning soon...');
+    } else {
+      set('hb-timer', hunting ? 'Hunt in progress' : 'Not hunting');
+    }
+
+    // Captcha solver
+    const solverOk = d.captcha_solver !== false;
+    const sdot = document.getElementById('solver-dot');
+    sdot.style.background  = solverOk ? 'var(--green)' : 'var(--red)';
+    sdot.style.boxShadow   = solverOk ? '0 0 6px var(--green)' : '0 0 6px var(--red)';
+    set('solver-status', solverOk ? 'Ready' : 'Unavailable');
+    set('d-solver', solverOk ? 'Ready' : 'Unavailable');
+    document.getElementById('d-solver').className = 'ir-val ' + (solverOk ? 'green' : 'red');
+
+    // Day skip
+    set('d-dayskip', d.lifetime_day_skip ? 'YES 🌙' : 'NO');
+    document.getElementById('d-dayskip').className = 'ir-val ' + (d.lifetime_day_skip ? 'yellow' : '');
+
+    // Last updated
+    if (d.updated_at) set('d-updated', new Date(d.updated_at).toLocaleTimeString());
+
+    // Speed buttons
+    document.querySelectorAll('.spbtn').forEach(b => b.classList.remove('active'));
+    const spBtn = document.getElementById('spd-' + sp);
+    if (spBtn) spBtn.classList.add('active');
+
+    // Command bars
+    const total = d.commands_sent || 0;
+    const H    = Math.floor(total * .35), B = Math.floor(total * .20);
+    const P    = Math.floor(total * .10), C = Math.floor(total * .08);
+    const HB   = Math.floor(total * .03), U = Math.floor(total * .02);
+    const mx   = Math.max(H, 1);
+    setBar('h', H, H/mx); setBar('b', B, B/mx); setBar('pray', P, P/mx);
+    setBar('cf', C, C/mx); setBar('hb', HB, HB/mx); setBar('use', U, U/mx);
+
+    // Ticker
+    const tItems = [
+      { l: online ? 'ONLINE' : 'OFFLINE', c: online ? 'var(--green)' : 'var(--red)' },
+      { l: `CMD: ${(d.commands_sent||0).toLocaleString()}`, c: 'var(--cyan)' },
+      { l: `GEMS: ${d.gems_used||0}`,   c: 'var(--yellow)' },
+      { l: `MODE: ${sp.toUpperCase()}`, c: 'var(--purple)' },
+      { l: `HB: ${hunting ? 'HUNTING' : 'IDLE'}`, c: 'var(--orange)' },
+      { l: `SLEEP: ${sleeping ? 'YES' : 'NO'}`,   c: 'var(--text)' },
+      { l: `UPTIME: ${d.uptime || '—'}`, c: 'var(--cyan)' },
+    ];
+    const th = [...tItems, ...tItems].map(i =>
+      `<div class="tick-item"><div class="tdot" style="background:${i.c}"></div><span style="color:${i.c}">${i.l}</span></div>`
+    ).join('');
+    document.getElementById('ticker').innerHTML = th;
+
+  } catch {
+    document.getElementById('status-pill').className = 'status-pill offline';
+    document.getElementById('status-lbl').textContent = 'SERVER DOWN';
+  }
+}
+
+async function pollLogs() {
+  try {
+    const r = await fetch('/api/logs?limit=80');
+    if (!r.ok) return;
+    const logs = await r.json();
+    if (!logs.length) return;
+    const sig = logs[0].time + logs[0].msg;
+    if (sig === lastLogSig) return;
+    lastLogSig = sig;
+    const container = document.getElementById('log-container');
+    container.innerHTML = logs.map(e =>
+      `<div class="lentry ${e.type||'info'}">
+        <span class="ltime">${e.time||''}</span>
+        <span class="lico">${e.icon||'📋'}</span>
+        <span class="lmsg">${esc(e.msg||'')}</span>
+      </div>`
+    ).join('');
+  } catch {}
+}
+
+// ─── Speed UI hint ────────────────────────────────────────────────────────────
+function spUI(mode, el) {
+  document.querySelectorAll('.spbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  toast(`Type .speed ${mode} in Discord to apply ⚡`, 'ok');
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function setBar(id, count, ratio) {
+  const bc = document.getElementById('bc-'+id);
+  const bf = document.getElementById('bf-'+id);
+  if (bc) bc.textContent = count > 999 ? (count/1000).toFixed(1)+'K' : count;
+  if (bf) bf.style.width  = Math.round(ratio*100) + '%';
+}
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+(async () => {
+  // Check token on load
+  try {
+    const r = await fetch('/api/token');
+    const d = await r.json();
+    hasToken = d.has_token;
+    updateHomeView(hasToken);
+  } catch {
+    updateHomeView(false);
+  }
+
+  // Start polling
+  setInterval(pollStatus, 1000);
+  setInterval(pollLogs,   1000);
+  pollStatus();
+  pollLogs();
+})();
+</script>
+</body>
+</html>
